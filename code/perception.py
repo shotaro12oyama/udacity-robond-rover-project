@@ -139,7 +139,7 @@ def perception_step(Rover):
         #          Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
     Rover.worldmap[y_world, x_world, 2] += 10
-    Rover.worldmap[obs_x_world, obs_y_world, 0] += 1
+    Rover.worldmap[obs_y_world, obs_x_world, 0] += 1
 
 
 
