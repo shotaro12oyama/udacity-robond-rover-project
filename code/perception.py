@@ -159,5 +159,10 @@ def perception_step(Rover):
         rock_idx = np.argmin(rock_dist)
         rock_xcen = rock_x_world[rock_idx]
         rock_ycen = rock_y_world[rock_idx]
+
+        Rover.worldmap[rock_ycen, rock_xcen, 1] = 255
+        Rover.vision_image[:, :, 1] = rock_map * 255
+    else:
+        Rover.vision_image[:, :, 1] = 0
     
     return Rover
