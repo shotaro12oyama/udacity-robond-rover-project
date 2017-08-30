@@ -1,5 +1,5 @@
 import numpy as np
-
+import random
 
 # This is where you can build a decision tree for determining throttle, brake and steer 
 # commands based on the output of the perception_step() function
@@ -23,9 +23,43 @@ def decision_step(Rover):
                     Rover.throttle = Rover.throttle_set
                 else: # Else coast
                     Rover.throttle = 0
-                Rover.brake = 0
+                Rover.brake = 0                     
                 # Set steering to average angle clipped to the range +/- 15
-                Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
+                # Decision is made based on close environment
+
+                nav_angles = np.array(Rover.nav_angles)
+                nav_angles = nav_angles [ np.where(Rover.nav_dists < 100) ]
+                if nav_angles[(nav_angles > -2.5) & (nav_angles < 2.5)].any():
+                    Rover.steer = 0
+
+                obs_angles = np.array(Rover.obs_angles)
+                obs_angles = obs_angles [ np.where(Rover.obs_dists < 30) ]
+                obs_angles = obs_angles * 180/np.pi
+                print('angle_candidates=', obs_angles)
+                #separate to steer angle range candidate and check each
+                steer_candidate = [0, 5, -5, 10, -10, 15, -15]
+                if obs_angles[(obs_angles < -12.5)].any():
+                    steer_candidate.remove(-15)
+                if obs_angles[(obs_angles > -12.5) & (obs_angles < -7.5)].any():
+                    steer_candidate.remove(-10)
+                if obs_angles[(obs_angles > -7.5) & (obs_angles < -2.5)].any():
+                    steer_candidate.remove(-5)
+                if obs_angles[(obs_angles > -2.5) & (obs_angles < 2.5)].any():
+                    steer_candidate.remove(0)
+                if obs_angles[(obs_angles > 2.5) & (obs_angles < 7.5)].any():
+                    steer_candidate.remove(5)
+                if obs_angles[(obs_angles > 7.5) & (obs_angles < 12.5)].any():
+                    steer_candidate.remove(10)
+                if obs_angles[(obs_angles > 12.5)].any():
+                    steer_candidate.remove(15)
+                
+                if not len(steer_candidate) == 0:
+                    print('steer_candidate =', steer_candidate)
+                    Rover.steer = random.choice(steer_candidate)
+                
+
+                else:
+                    Rover.mode = 'stop'
                 
             # If there's a lack of navigable terrain pixels then go to 'stop' mode
             elif len(Rover.nav_angles) < Rover.stop_forward:
@@ -35,6 +69,7 @@ def decision_step(Rover):
                     Rover.brake = Rover.brake_set
                     Rover.steer = 0
                     Rover.mode = 'stop'
+            
 
         # If we're already in "stop" mode then make different decisions
         elif Rover.mode == 'stop':
