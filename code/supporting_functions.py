@@ -139,7 +139,12 @@ def create_output_images(Rover):
       cv2.putText(map_add,"  Located: "+str(samples_located), (0, 70), 
                   cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
       cv2.putText(map_add,"  Collected: "+str(Rover.samples_collected), (0, 85), 
+                  cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)      
+
+      #Add some text for specific Rover status
+      cv2.putText(map_add,"  Rover.mode: "+str(Rover.mode), (0, 100), 
                   cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+      
       # Convert map and vision image to base64 strings for sending to server
       pil_img = Image.fromarray(map_add.astype(np.uint8))
       buff = BytesIO()

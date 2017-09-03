@@ -42,6 +42,8 @@ class RoverState():
         self.total_time = None # To record total duration of naviagation
         self.img = None # Current camera image
         self.pos = None # Current position (x, y)
+        self.pos_prev = None #To avoid postion stack
+        self.pos_count = 0 #To avoid position stack
         self.yaw = None # Current yaw angle
         self.pitch = None # Current pitch angle
         self.roll = None # Current roll angle
@@ -53,6 +55,8 @@ class RoverState():
         self.nav_dists = None # Distances of navigable terrain pixels
         self.obs_angles = None # Angles of obstacle pixels
         self.obs_dists = None # Distances of obstacle pixels 
+        self.rock_angles = None # Angles of rock pixels
+        self.rock_dist = None # Distances of rock pixels
         self.ground_truth = ground_truth_3d # Ground truth worldmap
         self.mode = 'forward' # Current mode (can be forward or stop)
         self.throttle_set = 0.2 # Throttle setting when accelerating
