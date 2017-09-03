@@ -44,12 +44,33 @@ And another!
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
 
+##### 'perception step()
+
+At fisrt, I defined the source points and the destination points and apply perspective transform to the picture from the Mover's front camera. Second, I appilied color threshhold to identify navigable terrain/obstacles/rock samples. Also, I changed correspoding pixel color to display the area Rover found on the left side screen of simulator.
+ 
+Next, I converted map image pixel values to rover-centric coordinates for both navigable terrain and obstacles. Then I converted it to world coordinates, and update Rover's world map.
+
+Next, I converted rover-centric pixel positions to polar coordinates in order to manipulate Rover's steering.
+Separterly I did the same conversion to the rock pixels when Rover find some rocks.    
+
+##### 'descision_step()
+
+Af first, I checked whether there is the navigable terrain with threshhold. If exits, Rover is set as 'forward' mmode. In 'forward' mode, throttle is on if the velocity does not reach the Max limit. Angle is decided to the minimum candidate based on the detection of obstacles (when detecting, the angle is removed from the candidate). This is because I wanted to make Rover run along with the wall counter-clockwise.
+
+Otherwise set as 'stop' mode, and make Rover rotate to find the navigable angles. 
+
+
+If the rock is close to the Rover, Rover is set as 'pick' mode, then try to stop near by the rock. if near_sample attribute is 1, Rover picks up the rock, then move to 'forward' mode again.
+
+Also, in case that Rover cannot move by any mode, I made a check the position of Rover, and if find it is not changed, Rover try to rotate and throttle in order to move.
+
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
 ***Note: running the simulator with 1,024 x 768 with "Good" as a choices of resolution and graphics quality. FPS output is set  to 48 by (`drive_rover.py`).**
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+When I tried, the results was as follows.
+
 
 
 
