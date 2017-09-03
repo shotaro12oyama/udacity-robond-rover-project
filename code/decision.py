@@ -61,16 +61,6 @@ def decision_step(Rover):
                     Rover.brake = 0
                     Rover.steer = 15
                     Rover.mode = 'stop'
-
-            if Rover.pos_prev is not None:
-                if  np.round(Rover.pos[0],3) == np.round(Rover.pos_prev[0],3) and np.round(Rover.pos[1],3) == np.round(Rover.pos_prev[1],3):
-                    Rover.pos_count += 1
-                    Rover.throttle = 0
-                    Rover.brake = 0
-                    Rover.steer = 15
-
-                    if Rover.pos_count % 3 == 0:
-                        Rover.throttle = Rover.throttle_set 
                     
 
         # If we're already in "stop" mode then make different decisions
@@ -104,36 +94,43 @@ def decision_step(Rover):
     # even if no modifications have been made to the code
         elif Rover.mode =='pick':
             rock_angles = np.array(Rover.rock_angles)
-
-            if not Rover.rock_dist[(Rover.rock_dist < 50)].any():
-                Rover.mode ='forward'
-
+            
             if Rover.near_sample == 1:
                 Rover.steer = 0
                 Rover.brake = Rover.brake_set
                 Rover.samples_collected +=1
-                Rover.mode = 'forward'
+                Rover.rock_dist = None
+                Rover.rock_angles = None
+
+            elif Rover.rock_dist[(Rover.rock_dist < 10)].any():
+                Rover.throttle = 0
+                Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
+                Rover.brake = Rover.brake_set
 
             else: 
                 Rover.throttle = Rover.throttle_set
                 Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
                 Rover.brake = 0
-                Rover.mode ='pick'
+
             
-
-            if Rover.rock_dist[(Rover.rock_dist < 10)].any():
-                Rover.throttle = 0
-                Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
-                Rover.brake = Rover.brake_set
-                Rover.mode = 'pick'
-
-
-
+            if Rover.rock_dist is None:
+                Rover.mode ='forward'
 
     else:
         Rover.throttle = Rover.throttle_set
         Rover.steer = 0
         Rover.brake = 0
+
+    # when rover cannot move by any mode
+    if Rover.pos_prev is not None:
+        if  np.round(Rover.pos[0],3) == np.round(Rover.pos_prev[0],3) and np.round(Rover.pos[1],3) == np.round(Rover.pos_prev[1],3):
+            Rover.pos_count += 1
+            Rover.throttle = 0
+            Rover.brake = 0
+            Rover.steer = 15
+
+            if Rover.pos_count % 3 == 0:
+                Rover.throttle = Rover.throttle_set 
 
 
     # If in a state where want to pickup a rock send pickup command
