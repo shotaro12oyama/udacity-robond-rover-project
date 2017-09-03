@@ -21,8 +21,8 @@
 
 [//]: # (Image References)
 
-[image1]: ./misc/example1.jpg
-[image2]: ./calibration_images/example2.jpg
+[image1]: ./calibration_images/example1.png
+[image2]: ./calibration_images/example2.png
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
