@@ -72,7 +72,3 @@ When I tried, the results was as follows.
 
 
 
-
-![alt text][image3]
-
-
