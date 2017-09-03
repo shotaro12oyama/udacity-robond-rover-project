@@ -50,155 +50,27 @@ At fisrt, I defined the source points and the destination points and apply persp
  
 Next, I converted map image pixel values to rover-centric coordinates for both navigable terrain and obstacles. Then I converted it to world coordinates, and update Rover's world map.
 
-Next, I converted rover-centric pixel positions to polar coordinates
-separterly I  when Rover see if we can find some rocks
-    
+Next, I converted rover-centric pixel positions to polar coordinates in order to manipulate Rover's steering.
+Separterly I did the same conversion to the rock pixels when Rover find some rocks.    
 
 ##### 'descision_step()
 
+Af first, I checked whether there is the navigable terrain with threshhold. If exits, Rover is set as 'forward' mmode. In 'forward' mode, throttle is on if the velocity does not reach the Max limit. Angle is decided to the minimum candidate based on the detection of obstacles (when detecting, the angle is removed from the candidate). This is because I wanted to make Rover run along with the wall counter-clockwise.
 
-# Check if we have vision data to make decisions with
-    if Rover.nav_angles is not None:
-        # Check for Rover.mode status
-        if Rover.mode == 'forward': 
-            # Check the extent of navigable terrain
-            if len(Rover.nav_angles) >= Rover.stop_forward:  
-                # If mode is forward, navigable terrain looks good 
-                # and velocity is below max, then throttle 
-                if Rover.vel < Rover.max_vel:
-                    # Set throttle value to throttle setting
-                    Rover.throttle = Rover.throttle_set
-                else: # Else coast
-                    Rover.throttle = 0
-                Rover.brake = 0                     
-                # Decision is made based on the distance and existance of obstacles
-                obs_angles = np.array(Rover.obs_angles)
-                obs_angles = obs_angles [ np.where(Rover.obs_dists < 40) ]
-                obs_angles = obs_angles * 180/np.pi
-                #separate to steer angle range candidate and check each
-                steer_candidate = [0, 5, 10, 15]
-                if obs_angles[(obs_angles > -2.5) & (obs_angles < 2.5)].any():
-                    steer_candidate.remove(0)
-                if obs_angles[(obs_angles > 2.5) & (obs_angles < 7.5)].any():
-                    steer_candidate.remove(5)
-                if obs_angles[(obs_angles > 7.5) & (obs_angles < 12.5)].any():
-                    steer_candidate.remove(10)
-                if obs_angles[(obs_angles > 12.5) & (obs_angles < 17.5)].any():
-                    steer_candidate.remove(15)
-                #select the minimum available steer angle
-                if len(steer_candidate) > 0:
-                    Rover.steer = np.min(steer_candidate)
-                if not obs_angles[(obs_angles > -17.5) & (obs_angles < -2.5)].any():
-                    Rover.steer = -15
-                #to move 'pick' mode when finding rocks
-                if Rover.rock_angles is not None:
-                    rock_angles = np.array(Rover.rock_angles)
-                    rock_angles = rock_angles [ np.where(Rover.rock_dist < 50) ]
-                    if len(rock_angles) > 0:
-                        Rover.steer = np.clip(np.mean(rock_angles *180/np.pi), -15, 15)
-                        Rover.mode = 'pick'
-
-            # If there's a lack of navigable terrain pixels then go to 'stop' mode
-            elif len(Rover.nav_angles) < Rover.stop_forward:
-                    # Set mode to "stop" and hit the brakes!
-                    Rover.throttle = 0
-                    # Set brake to stored brake value
-                    Rover.brake = 0
-                    Rover.steer = 15
-                    Rover.mode = 'stop'
-                    
-
-        # If we're already in "stop" mode then make different decisions
-        elif Rover.mode == 'stop':
-            # If we're in stop mode but still moving keep braking
-            if Rover.vel > 0.2:
-                Rover.throttle = 0
-                Rover.brake = Rover.brake_set
-                Rover.steer = 0
-            # If we're not moving (vel < 0.2) then do something else
-            elif Rover.vel <= 0.2:
-                # Now we're stopped and we have vision data to see if there's a path forward
-                if len(Rover.nav_angles) < Rover.go_forward:
-                    Rover.throttle = 0
-                    # Release the brake to allow turning
-                    Rover.brake = 0
-                    # Turn range is +/- 15 degrees, when stopped the next line will induce 4-wheel turning
-                    Rover.steer = 15 # Could be more clever here about which way to turn
-                # If we're stopped but see sufficient navigable terrain in front then go!
-                if len(Rover.nav_angles) >= Rover.go_forward:
-                    # Set throttle back to stored value
-                    Rover.throttle = Rover.throttle_set
-                    # Release the brake
-                    Rover.brake = 0
-                    # Set steer to mean angle
-                    Rover.steer = 15
-                    Rover.mode = 'forward'
+Otherwise set as 'stop' mode, and make Rover rotate to find the navigable angles. 
 
 
-    # Just to make the rover do something 
-    # even if no modifications have been made to the code
-        elif Rover.mode =='pick':
-            rock_angles = np.array(Rover.rock_angles)
-            # to pick up when prepared
-            if Rover.near_sample == 1:
-                Rover.steer = 0
-                Rover.brake = Rover.brake_set
-                Rover.samples_collected +=1
-                Rover.rock_dist = None
-                Rover.rock_angles = None
-            # speed down when being close to the rock
-            elif Rover.rock_dist[(Rover.rock_dist < 10)].any():
-                Rover.throttle = 0
-                Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
-                Rover.brake = Rover.brake_set
-            # to come down to the rock
-            else: 
-                Rover.throttle = Rover.throttle_set
-                Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
-                Rover.brake = 0
-            # to move back to 'forward' mode
-            if Rover.rock_dist is None:
-                Rover.mode ='forward'
+If the rock is close to the Rover, Rover is set as 'pick' mode, then try to stop near by the rock. if near_sample attribute is 1, Rover picks up the rock, then move to 'forward' mode again.
 
-    else:
-        Rover.throttle = Rover.throttle_set
-        Rover.steer = 0
-        Rover.brake = 0
-
-    # when rover cannot move by any mode
-    if Rover.pos_prev is not None:
-        if Rover.near_sample == 1:
-            Rover.steer = 0
-
-        elif  np.round(Rover.pos[0],3) == np.round(Rover.pos_prev[0],3) and np.round(Rover.pos[1],3) == np.round(Rover.pos_prev[1],3):
-            Rover.pos_count += 1
-            Rover.throttle = 0
-            Rover.brake = 0
-            Rover.steer = 15
-
-            if Rover.pos_count % 3 == 0:
-                Rover.throttle = Rover.throttle_set 
-
-
-
-    # If in a state where want to pickup a rock send pickup command
-    if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
-        Rover.send_pickup = True
-    
-    Rover.pos_prev = Rover.pos
-    
-    return Rover
-
-
-
-
+Also, in case that Rover cannot move by any mode, I made a check the position of Rover, and if find it is not changed, Rover try to rotate and throttle in order to move.
 
 
 #### 2. Launching in autonomous mode your rover can navigate and map autonomously.  Explain your results and how you might improve them in your writeup.  
 
 ***Note: running the simulator with 1,024 x 768 with "Good" as a choices of resolution and graphics quality. FPS output is set  to 48 by (`drive_rover.py`).**
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+When I tried, the results was as follows.
+
 
 
 
