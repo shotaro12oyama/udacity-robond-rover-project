@@ -24,12 +24,10 @@ def decision_step(Rover):
                 else: # Else coast
                     Rover.throttle = 0
                 Rover.brake = 0                     
-                # Set steering to average angle clipped to the range 15
-                # Decision is made based on close environment
+                # Decision is made based on the distance and existance of obstacles
                 obs_angles = np.array(Rover.obs_angles)
                 obs_angles = obs_angles [ np.where(Rover.obs_dists < 40) ]
                 obs_angles = obs_angles * 180/np.pi
-                #print('angle_candidates=', obs_angles)
                 #separate to steer angle range candidate and check each
                 steer_candidate = [0, 5, 10, 15]
                 if obs_angles[(obs_angles > -2.5) & (obs_angles < 2.5)].any():
@@ -40,12 +38,12 @@ def decision_step(Rover):
                     steer_candidate.remove(10)
                 if obs_angles[(obs_angles > 12.5) & (obs_angles < 17.5)].any():
                     steer_candidate.remove(15)
-                                
+                #select the minimum available steer angle
                 if len(steer_candidate) > 0:
                     Rover.steer = np.min(steer_candidate)
                 if not obs_angles[(obs_angles > -17.5) & (obs_angles < -2.5)].any():
                     Rover.steer = -15
-                
+                #to move 'pick' mode when finding rocks
                 if Rover.rock_angles is not None:
                     rock_angles = np.array(Rover.rock_angles)
                     rock_angles = rock_angles [ np.where(Rover.rock_dist < 50) ]
@@ -94,25 +92,24 @@ def decision_step(Rover):
     # even if no modifications have been made to the code
         elif Rover.mode =='pick':
             rock_angles = np.array(Rover.rock_angles)
-            
+            # to pick up when prepared
             if Rover.near_sample == 1:
                 Rover.steer = 0
                 Rover.brake = Rover.brake_set
                 Rover.samples_collected +=1
                 Rover.rock_dist = None
                 Rover.rock_angles = None
-
+            # speed down when being close to the rock
             elif Rover.rock_dist[(Rover.rock_dist < 10)].any():
                 Rover.throttle = 0
                 Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
                 Rover.brake = Rover.brake_set
-
+            # to come down to the rock
             else: 
                 Rover.throttle = Rover.throttle_set
                 Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
                 Rover.brake = 0
-
-            
+            # to move back to 'forward' mode
             if Rover.rock_dist is None:
                 Rover.mode ='forward'
 
@@ -123,7 +120,10 @@ def decision_step(Rover):
 
     # when rover cannot move by any mode
     if Rover.pos_prev is not None:
-        if  np.round(Rover.pos[0],3) == np.round(Rover.pos_prev[0],3) and np.round(Rover.pos[1],3) == np.round(Rover.pos_prev[1],3):
+        if Rover.near_sample == 1:
+            Rover.steer = 0
+
+        elif  np.round(Rover.pos[0],3) == np.round(Rover.pos_prev[0],3) and np.round(Rover.pos[1],3) == np.round(Rover.pos_prev[1],3):
             Rover.pos_count += 1
             Rover.throttle = 0
             Rover.brake = 0
@@ -131,6 +131,7 @@ def decision_step(Rover):
 
             if Rover.pos_count % 3 == 0:
                 Rover.throttle = Rover.throttle_set 
+
 
 
     # If in a state where want to pickup a rock send pickup command
