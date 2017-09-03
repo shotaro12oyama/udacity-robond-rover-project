@@ -29,7 +29,9 @@ def decision_step(Rover):
                 obs_angles = obs_angles [ np.where(Rover.obs_dists < 40) ]
                 obs_angles = obs_angles * 180/np.pi
                 #separate to steer angle range candidate and check each
-                steer_candidate = [0, 5, 10, 15]
+                steer_candidate = [-15, 0, 5, 10, 15]
+                if obs_angles[(obs_angles > -17.5) & (obs_angles < -2.5)].any():
+                    steer_candidate.remove(-15)
                 if obs_angles[(obs_angles > -2.5) & (obs_angles < 2.5)].any():
                     steer_candidate.remove(0)
                 if obs_angles[(obs_angles > 2.5) & (obs_angles < 7.5)].any():
@@ -41,8 +43,6 @@ def decision_step(Rover):
                 #select the minimum available steer angle
                 if len(steer_candidate) > 0:
                     Rover.steer = np.min(steer_candidate)
-                if not obs_angles[(obs_angles > -17.5) & (obs_angles < -2.5)].any():
-                    Rover.steer = -15
                 #to move 'pick' mode when finding rocks
                 if Rover.rock_angles is not None:
                     rock_angles = np.array(Rover.rock_angles)
