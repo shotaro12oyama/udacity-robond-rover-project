@@ -69,7 +69,18 @@ Also, in case that Rover cannot move by any mode, I made a check the position of
 
 ***Note: running the simulator with 1,024 x 768 with "Good" as a choices of resolution and graphics quality. FPS output is set  to 48 by (`drive_rover.py`).**
 
-When I tried, the results was as follows.
+When I tried several times, the results was as follows.
+
+| KPI    |  Result  |
+|:------:|:--------:|
+| Mapped | 70-80%   |
+| Fidelity | 55-65% |
+| Time   | 1,000s   |
+| rocks collected | 2-4 |
+
+Rover sometimes could not find the rocks correctly, or stopped by obstacles. I mainly tried to improve the result by the changing steering decision pipeline as above, however, it is difficult to improve more by the same approach. I assume that I may use other color detection techniques, such as HLS threshhold.
+
+
 
 
 
