@@ -99,19 +99,34 @@ def decision_step(Rover):
                 Rover.samples_collected +=1
                 Rover.rock_dist = None
                 Rover.rock_angles = None
+                print('mode:1')
+
             # speed down when being close to the rock
             elif Rover.rock_dist[(Rover.rock_dist < 10)].any():
                 Rover.throttle = 0
                 Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
                 Rover.brake = Rover.brake_set
+
+                print('mode:2')
+
             # to come down to the rock
             else: 
                 Rover.throttle = Rover.throttle_set
                 Rover.steer = np.clip(np.mean(rock_angles * 180/np.pi), -15, 15)
                 Rover.brake = 0
+
+                print('mode:3')
+
             # to move back to 'forward' mode
             if Rover.rock_dist is None:
                 Rover.mode ='forward'
+                print('mode:4')
+
+            if not Rover.rock_dist[(Rover.rock_dist < 75)].any():
+                Rover.mode ='forward'
+                print('mode:5')
+
+
 
     else:
         Rover.throttle = Rover.throttle_set
