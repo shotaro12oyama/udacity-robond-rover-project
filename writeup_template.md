@@ -21,8 +21,8 @@
 
 [//]: # (Image References)
 
-[image1]: ./calibration_images/example1.png
-[video1]: ./output/test_mapping.mp4 
+[image1]: ./calibration_images/example1.png "Calibration Example"
+[video1]: ./output/test_mapping.mp4 "Mapping Test Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
