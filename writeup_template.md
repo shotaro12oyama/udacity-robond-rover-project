@@ -22,7 +22,7 @@
 [//]: # (Image References)
 
 [image1]: ./calibration_images/example1.png
-[image2]: ./calibration_images/example2.png
+[video1]: ./output/test_mapping.mp4 
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/916/view) Points
 ### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
@@ -38,7 +38,7 @@ Here is an example image.
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
 And another! 
 
-![alt text][image2]
+![alt text][video1]
 ### Autonomous Navigation and Mapping
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
