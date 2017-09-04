@@ -36,7 +36,8 @@ Here is an example image.
 ![alt text][image1]
 
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
-And [another!] (./output/test_mapping.mp4) 
+
+And [another.] (./output/test_mapping.mp4) 
 
 ### Autonomous Navigation and Mapping
 
